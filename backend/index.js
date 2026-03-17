@@ -28,7 +28,11 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(useragent.express());
+if (useragent && useragent.express) {
+  app.use(useragent.express());
+} else if (useragent && useragent.default && useragent.default.express) {
+  app.use(useragent.default.express());
+}
 
 // Routes
 app.use("/api/url", apiRoutes);

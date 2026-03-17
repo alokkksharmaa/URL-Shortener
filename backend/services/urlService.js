@@ -1,5 +1,5 @@
 import Url from '../models/Url.js';
-import Click from './models/Click.js';
+import Click from '../models/Click.js';
 import redisClient from '../redis.js';
 import { encode } from '../utils/base62.js';
 import { CustomError } from '../middlewares/errorHandler.js';
