@@ -16,6 +16,8 @@ const urlSchema = new mongoose.Schema(
     visitHistory: [
       {
         timestamp: { type: Number },
+        device: { type: String, default: "Unknown" },
+        referrer: { type: String, default: "Direct" }
       },
     ],
   },
@@ -23,8 +25,6 @@ const urlSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-
 
 const URL = mongoose.model("url", urlSchema);
 

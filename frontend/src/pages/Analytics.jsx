@@ -15,6 +15,14 @@ import {
 import '../App.css';
 import './Analytics.css';
 
+const SkeletonCard = () => (
+  <div className="animate-pulse bg-gray-200 dark:bg-gray-800 rounded-xl h-24 w-full border border-[var(--border)]"></div>
+);
+
+const SkeletonChart = () => (
+  <div className="animate-pulse bg-gray-200 dark:bg-gray-800 rounded-xl h-72 w-full border border-[var(--border)] mt-4"></div>
+);
+
 const mockData = {
   totalClicks: 1428,
   clicksOverTime: {
@@ -55,6 +63,15 @@ const mockData = {
 export default function Analytics() {
   const { shortCode } = useParams();
   const [dateRange, setDateRange] = useState('7d');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial data fetching
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [shortCode]);
 
   const chartData = useMemo(() => mockData.clicksOverTime[dateRange], [dateRange]);
 
@@ -84,32 +101,40 @@ export default function Analytics() {
           <p className="subtitle">shrt.lnk/<span>{shortCode}</span></p>
         </div>
         
-        <div className="metric-cards">
-          <div className="metric-card">
-            <h3>Total Clicks</h3>
-            <div className="metric-value">{mockData.totalClicks.toLocaleString()}</div>
+        {isLoading ? (
+          <div className="metric-cards flex items-end gap-5 mb-10 w-full flex-wrap">
+            <div className="flex-1 min-w-[200px]"><SkeletonCard /></div>
+            <div className="flex-1 min-w-[200px]"><SkeletonCard /></div>
           </div>
-          
-          <div className="filter-card">
-            <label htmlFor="range">Date Range</label>
-            <select 
-              id="range" 
-              value={dateRange} 
-              onChange={(e) => setDateRange(e.target.value)}
-              className="range-select"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="all">All Time</option>
-            </select>
+        ) : (
+          <div className="metric-cards">
+            <div className="metric-card">
+              <h3>Total Clicks</h3>
+              <div className="metric-value">{mockData.totalClicks.toLocaleString()}</div>
+            </div>
+            
+            <div className="filter-card">
+              <label htmlFor="range">Date Range</label>
+              <select 
+                id="range" 
+                value={dateRange} 
+                onChange={(e) => setDateRange(e.target.value)}
+                className="range-select"
+              >
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
           </div>
-        </div>
+        )}
       </header>
 
       <main className="analytics-grid">
         <div className="chart-card span-2">
           <h2>Clicks Over Time</h2>
-          <div className="chart-wrapper">
+          {isLoading ? <SkeletonChart /> : (
+            <div className="chart-wrapper">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -127,11 +152,13 @@ export default function Analytics() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          )}
         </div>
 
         <div className="chart-card">
           <h2>Top Referrers</h2>
-          <ul className="referrers-list">
+          {isLoading ? <SkeletonChart /> : (
+          <ul className="referrers-list mt-4">
             {mockData.referrers.map((ref, idx) => (
               <li key={idx} className="referrer-item">
                 <div className="referrer-info">
@@ -144,14 +171,17 @@ export default function Analytics() {
               </li>
             ))}
           </ul>
+          )}
         </div>
 
         <div className="chart-card">
           <h2>Device Breakdown</h2>
-          <div className="pie-wrapper">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
+          {isLoading ? <SkeletonChart /> : (
+          <>
+            <div className="pie-wrapper mt-4">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
                   data={mockData.devices}
                   cx="50%"
                   cy="50%"
@@ -171,15 +201,17 @@ export default function Analytics() {
                 />
               </PieChart>
             </ResponsiveContainer>
-          </div>
-          <div className="legend-custom">
-            {mockData.devices.map((device, idx) => (
-              <div key={idx} className="legend-item">
-                <span className="legend-color" style={{ backgroundColor: device.color }}></span>
-                <span className="legend-label">{device.name} ({device.value}%)</span>
-              </div>
-            ))}
-          </div>
+            </div>
+            <div className="legend-custom">
+              {mockData.devices.map((device, idx) => (
+                <div key={idx} className="legend-item">
+                  <span className="legend-color" style={{ backgroundColor: device.color }}></span>
+                  <span className="legend-label">{device.name} ({device.value}%)</span>
+                </div>
+              ))}
+            </div>
+          </>
+          )}
         </div>
       </main>
     </div>

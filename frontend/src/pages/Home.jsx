@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 import '../App.css'
 
 export default function Home() {
@@ -34,10 +35,14 @@ export default function Home() {
   const handleShorten = (e) => {
     e.preventDefault()
     if (!url) {
+      toast.error('URL is required')
       setError('URL is required')
       return
     }
-    if (error) return
+    if (error) {
+      toast.error(error)
+      return
+    }
 
     setLoading(true)
     setShortenedUrl('')
@@ -54,6 +59,7 @@ export default function Home() {
       
       setShortenedUrl(newShortUrl)
       setLoading(false)
+      toast.success('Link shortened successfully!')
 
       const newLink = { original: url, short: newShortUrl, date: new Date().toISOString() }
       const updatedLinks = [newLink, ...recentLinks.filter(l => l.short !== newShortUrl)].slice(0, 5)
@@ -68,6 +74,7 @@ export default function Home() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shortenedUrl)
     setCopied(true)
+    toast.success('Copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -156,8 +163,11 @@ export default function Home() {
                     <span className="recent-original">{link.original}</span>
                   </div>
                   <button 
-                    className="icon-copy-btn" 
-                    onClick={() => navigator.clipboard.writeText(link.short)}
+                    className="icon-copy-btn cursor-pointer" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(link.short);
+                      toast.success('Copied to clipboard!');
+                    }}
                     title="Copy to clipboard"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
